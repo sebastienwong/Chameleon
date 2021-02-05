@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     </head>
     <body>
-        <div id="main">
-            <h1>Hello World</h1>
+        <h1>Chameleon</h1>
+        <form id="name_form">
+            <input id="name_set">
+            <button id="submit">Join</button>
+        </form>
+        <div id="buttons" style="display:none">
+            <button id="start_game">Start</button>
+            <button id="cham">Get Cham</button>
         </div>
-        <button id="hello">Click me</button>
+        <div id="main">
+        </div>
+        
 
         <script src="/socket.io/socket.io.js"></script>
         <script src="src/client.js"></script>
