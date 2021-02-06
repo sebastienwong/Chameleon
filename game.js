@@ -112,6 +112,10 @@ const createGame = (topics) => {
         started = true;
     }
 
+    const restart = () => {
+        
+    }
+
     const endWordPhase = () => {
         
     }

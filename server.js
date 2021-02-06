@@ -1,21 +1,38 @@
-const http = require('http');
+//const http = require('http');
+
 const express = require('express');
-const socketio = require('socket.io');
+const socketIO = require('socket.io');
+
+const PORT = process.env.PORT || 5000;
+const INDEX = '/client/index.html';
 
 const topics = require('./topics.json');
-
 const createGame = require('./game');
 
-const app = express();
+//app.use(express.static(__dirname + "/../client"));
+const server = express()
+    .use(express.static(__dirname + '/client'))
+    .get('/', (req, res) => {
+        res.sendFile(__dirname + '/client/index.html');
+    })
+    .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
-app.use(express.static(__dirname + "/../client"));
+/*
+server.on('error', (err) => {
+    console.error(err);
+});
+*/
 
-const server = http.createServer(app);
-const io = socketio(server);
+//const server = http.createServer(app);
+const io = socketIO(server);
+
+
 const { addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, endWordPhase,
         isStarted, getOrder, getTurn, getTopic, getVotes } = createGame(topics);
 
+
 io.on('connection', (sock) => {
+    
     sock.emit('message', 'You are connected');
 
     sock.on('message', (text) => io.emit('message', text));
@@ -74,10 +91,12 @@ io.on('connection', (sock) => {
     });
 });
 
+/*
 server.on('error', (err) => {
     console.error(err);
 });
 
-server.listen(5000, () => {
+server.listen(PORT, () => {
     console.log('server is ready');
 });
+*/
