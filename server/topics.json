@@ -1,0 +1,25 @@
+{
+  "topics": [
+    {
+      "name": "Sports",
+      "words": [
+        "Soccer",
+        "Football",
+        "Baseball",
+        "Basketball",
+        "Cricket",
+        "Wrestling",
+        "Boxing",
+        "Tennis",
+        "Volleyball",
+        "Fencing",
+        "Track & Field",
+        "Swimming",
+        "Bowling",
+        "Archery",
+        "Skiing",
+        "Snowboarding"
+      ]
+    }
+  ]
+}

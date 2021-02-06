@@ -6,15 +6,23 @@
     <body>
         <h1>Chameleon</h1>
         <form id="name_form">
-            <input id="name_set">
+            <input id="name_set" autocomplete="off">
             <button id="submit">Join</button>
         </form>
+        <h2 id="name"></h2>
+        <div id="topic" style="display:none">
+        </div>
         <div id="buttons" style="display:none">
             <button id="start_game">Start</button>
-            <button id="cham">Get Cham</button>
         </div>
-        <div id="main">
+        <div id="players" style="display:none">
         </div>
+        <form id="word_form" style="display:none">
+            <input id="word_set" autocomplete="off">
+            <button>Send</button>
+        </form>
+        <div id="vote_buttons" style="display:block"></div>
+        <h1 id="win" style="display:none"></h1>
         
 
         <script src="/socket.io/socket.io.js"></script>
