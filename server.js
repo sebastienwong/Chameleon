@@ -27,7 +27,7 @@ server.on('error', (err) => {
 const io = socketIO(server);
 
 
-const { addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, endWordPhase,
+const { addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, restart, endWordPhase,
         isStarted, getOrder, getTurn, getTopic, getVotes } = createGame(topics);
 
 
@@ -39,11 +39,11 @@ io.on('connection', (sock) => {
 
     sock.on('join', (name) => {
         if(isStarted()) {
-            io.to(sock.id).emit('error', 'Game has started!');
+            sock.emit('error', 'Game has started!');
         } else if(addPlayer(sock.id, name)) {
             io.emit('message', getPlayers());
             sock.emit('joined', name);
-            io.emit('updatePlayers', getPlayers());
+            io.emit('update-players', getPlayers());
         } else {
             sock.emit('error', 'Game is full!');
         }
@@ -53,9 +53,14 @@ io.on('connection', (sock) => {
         startGame();
         io.emit('started', getPlayers()[sock.id].name);
         io.emit('message', getPlayers());
-        io.emit('updateTopic', getTopic());
-        io.emit('updatePlayers', getPlayers(), getOrder());
+        io.emit('update-topic', getTopic());
+        io.emit('update-players-ordered', getPlayers(), getOrder());
         io.emit('newTurn', getOrder()[getTurn()]);
+    });
+
+    sock.on('restart', () => {
+        restart();
+        io.emit('update-players-ordered', getPlayers(), getOrder());
     });
 
     sock.on('word', (word) => {
@@ -74,7 +79,7 @@ io.on('connection', (sock) => {
             let ids = tallyVotes();
             io.emit('endPhase');
             if(ids.length > 1) {
-                io.emit('tie', ids);
+                io.emit('tie', ids, getOrder());
             } else {
                 if(getChameleon() == ids[0]) {
                     io.emit('pWin', getPlayers()[ids[0]].name);
@@ -82,6 +87,14 @@ io.on('connection', (sock) => {
                     io.emit('cWin', getPlayers()[getChameleon()].name);
                 }
             }
+        }
+    });
+
+    server.on('tiebreak', (id) => {
+        if(getChameleon == id) {
+            io.emit('pWin', getPlayers()[ids[0]].name);
+        } else {
+            io.emit('cWin', getPlayers()[getChameleon()].name);
         }
     });
 

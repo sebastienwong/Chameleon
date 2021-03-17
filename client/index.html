@@ -2,14 +2,21 @@
 <html lang="en">
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+        <link rel="stylesheet" href="stylesheets/setup.css">
+        <link rel="stylesheet" href="stylesheets/game.css">
     </head>
     <body>
+        <!--
         <h1>Chameleon</h1>
         <form id="name_form">
             <input id="name_set" autocomplete="off">
             <button id="submit">Join</button>
         </form>
-        <h2 id="name"></h2>
+        <h2 id="name" style="display:none"></h2>
         <div id="topic" style="display:none">
         </div>
         <div id="buttons" style="display:none">
@@ -23,8 +30,13 @@
         </form>
         <div id="vote_buttons" style="display:block"></div>
         <h1 id="win" style="display:none"></h1>
-        
+        <button id="reset">Restart</button>
+        -->
+
+        <div id='root'></div>
+
         <script src="/socket.io/socket.io.js"></script>
-        <script src="/src/client.js"></script>
+        <!-- <script src="/src/client.js"></script> -->
+        <script src="/src/react.js" type="text/babel"></script>
     </body>
 </html>

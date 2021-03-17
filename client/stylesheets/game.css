@@ -1,0 +1,33 @@
+.topic-table {
+    height: 50%;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgb(3,117,154);
+    border-radius: 5px;
+}
+
+.topic-header {
+    margin-bottom: 0.9em;
+}
+
+.topic-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    text-align: center;
+}
+
+.topic-row:nth-child(even) {
+    background-color: rgba(3, 116, 154, 0.25);
+}
+
+.topic-word {
+    width: 25%;
+    font-family: 'Helvetica';
+    font-size: 1.5rem;
+    color: rgb(3,117,154);
+}
