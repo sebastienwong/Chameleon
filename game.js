@@ -8,6 +8,7 @@ const createGame = (topics) => {
     let order = [];
     let turn = 0;
     let votes = 0;
+    let prevCham = "";
 
     const addPlayer = (id, name) => {
         if(Object.keys(players).length < 8) {
@@ -78,11 +79,7 @@ const createGame = (topics) => {
         console.log(chameleon);
     }
 
-    const pickFirst = () => {
-        players[randomID()].first = true;
-    }
-
-    const pickOrder = () => {
+    const pickOrder = (restart=false) => {
         let array = Object.keys(players);
         let currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -93,6 +90,12 @@ const createGame = (topics) => {
             temporaryValue = array[currentIndex];
             array[currentIndex] = array[randomIndex];
             array[randomIndex] = temporaryValue;
+        }
+
+        if(restart) {
+            prevIndex = array.indexOf(prevCham);
+            array.splice(prevIndex, 1);
+            array.unshift(prevCham);
         }
 
         order = array;
@@ -108,21 +111,37 @@ const createGame = (topics) => {
         topic = ts[r];
     }
 
-    const getWord = () => {
+    const pickWord = () => {
         r = Math.floor(Math.random() * 16);
         word = topic.words[r];
+    }
+
+    const getWord = () => {
         return word;
     }
 
     const startGame = () => {
         pickTopic();
+        pickWord();
         pickChameleon();
         pickOrder();
         started = true;
     }
 
     const restart = () => {
-        
+        for(var id in players) {
+            players[id].cham = false
+            players[id].word = ""
+            players[id].vote = 0
+            players[id].voted = false
+        }
+        turn = 0;
+        votes = 0;
+        prevCham = chameleon;
+        pickTopic();
+        pickWord();
+        pickChameleon();
+        pickOrder(true);
     }
 
     const endWordPhase = () => {
@@ -150,7 +169,7 @@ const createGame = (topics) => {
     }
 
     return {
-        addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, endWordPhase, 
+        addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, restart, endWordPhase, 
         isStarted, getOrder, getTurn, getTopic, getWord, getVotes
     };
 };

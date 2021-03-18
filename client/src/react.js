@@ -15,6 +15,11 @@ class EndWrapper extends React.Component {
         this.setState({reveal: true});
     }
 
+    playAgain = () => {
+        console.log("play again");
+        this.props.socket.emit('restart');
+    }
+
     render() {
         if(!this.state.reveal) {
             return (
@@ -45,15 +50,32 @@ class EndWrapper extends React.Component {
                 return (
                     <div className="end-wrapper">
                         <h2>{this.props.chamName}</h2>
-                        <h3>They we're the chameleon!</h3>
+                        <h3 className="end-line">They we're the chameleon!</h3>
+                        <h3>But can they guess the word?</h3>
                     </div>
                 )
             } else if(this.props.cWin) {
                 return (
                     <div className="end-wrapper">
                         <h2>{this.props.votedName}</h2>
-                        <h3 className="end-lose">They we're NOT the chameleon!</h3>
-                        <h3>{this.props.chamName} blended in!</h3>
+                        <h3 className="end-line">They we're NOT the chameleon!</h3>
+                        <h3>{this.props.chamName} blended in!  Now can they guess the word?</h3>
+                    </div>
+                )
+            } else if(this.props.isCorrect == 1) {
+                return (
+                    <div className="end-wrapper">
+                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}!</h2>
+                        <h3 className="end-line">They got it!  Good job chameleon.</h3>
+                        <button onClick={this.playAgain}>Play again?</button>
+                    </div>
+                )
+            } else if(this.props.isCorrect == 0) {
+                return (
+                    <div className="end-wrapper">
+                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}!</h2>
+                        <h3 className="end-line">Nice try chameleon!  The word was {this.props.word}.</h3>
+                        <button onClick={this.playAgain}>Play again?</button>
                     </div>
                 )
             } else {
@@ -94,7 +116,7 @@ class OrderedPlayerList extends React.Component {
             for(let i = 0; i < this.props.order.length; i++) {
                 if(this.props.socket.id == this.props.order[i]) {
                     player_items.push(
-                        <li className="player-item" style={{border: this.state.votedId == this.props.order[i] ? "2px solid rgb(3,117,154)" : "none"}}key={this.props.order[i]}>
+                        <li className="player-item" style={{boxShadow: this.state.votedId == this.props.order[i] ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={this.props.order[i]}>
                             {this.props.players[this.props.order[i]].name}
                             <span className="word-label">{this.props.players[this.props.order[i]].word}</span>
                             {this.props.players[this.props.order[i]].voted && <span className="vote-label">voted</span>}
@@ -102,7 +124,7 @@ class OrderedPlayerList extends React.Component {
                     )
                 } else {
                     player_items.push(
-                        <li className="player-item votable-item" onClick={() => this.setVote(this.props.order[i])} style={{border: this.state.votedId == this.props.order[i] ? "2px solid rgb(3,117,154)" : "none"}}key={this.props.order[i]}>
+                        <li className="player-item votable-item" onClick={() => this.setVote(this.props.order[i])} style={{boxShadow: this.state.votedId == this.props.order[i] ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={this.props.order[i]}>
                             {this.props.players[this.props.order[i]].name}
                             <span className="word-label">{this.props.players[this.props.order[i]].word}</span>
                             {this.props.players[this.props.order[i]].voted && <span className="vote-label">voted</span>}
@@ -116,14 +138,14 @@ class OrderedPlayerList extends React.Component {
                     if(this.props.tiedIds.includes(this.props.order[i])) {
                         if(this.props.socket.id == this.props.order[i]) {
                             player_items.push(
-                                <li className="player-item"style={{border: this.state.votedId == this.props.order[i] ? "2px solid rgb(3,117,154)" : "none"}}key={this.props.order[i]}>
+                                <li className="player-item" style={{boxShadow: this.state.votedId == this.props.order[i] ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={this.props.order[i]}>
                                     {this.props.players[this.props.order[i]].name}
                                     <span className="word-label">{this.props.players[this.props.order[i]].word}</span>
                                 </li>
                             )
                         } else {
                             player_items.push(
-                                <li className="player-item votable-item" onClick={() => this.tiebreak(this.props.order[i])} style={{border: this.state.votedId == this.props.order[i] ? "2px solid rgb(3,117,154)" : "none"}}key={this.props.order[i]}>
+                                <li className="player-item votable-item" onClick={() => this.tiebreak(this.props.order[i])} style={{boxShadow: this.state.votedId == this.props.order[i] ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={this.props.order[i]}>
                                     {this.props.players[this.props.order[i]].name}
                                     <span className="word-label">{this.props.players[this.props.order[i]].word}</span>
                                 </li>
@@ -134,7 +156,7 @@ class OrderedPlayerList extends React.Component {
             } else {
                 for(let i = 0; i < this.props.order.length; i++) {
                     player_items.push(
-                        <li className="player-item" style={{border: this.state.votedId == this.props.order[i] ? "2px solid rgb(3,117,154)" : "none"}}key={this.props.order[i]}>
+                        <li className="player-item" style={{boxShadow: this.state.votedId == this.props.order[i] ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={this.props.order[i]}>
                             {this.props.players[this.props.order[i]].name}
                             <span className="word-label">{this.props.players[this.props.order[i]].word}</span>
                         </li>
@@ -163,36 +185,53 @@ class OrderedPlayerList extends React.Component {
     }
 }
 
-function TopicTable(props) {
-    return (
-        <div className="topic-table">
-            <h2 className="topic-header">{props.topic.name}</h2>
-            <div className="topic-row">
-                <p className="topic-word">{props.topic.words[0]}</p>
-                <p className="topic-word">{props.topic.words[1]}</p>
-                <p className="topic-word">{props.topic.words[2]}</p>
-                <p className="topic-word">{props.topic.words[3]}</p>
+class TopicTable extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    pickWord = (index) => {
+        this.props.socket.emit('cham-word', index);
+    }
+
+    render() {
+        let rows = [];
+        let row = [];
+
+        for(let i = 0; i < 4; i++) {
+            for(let j = 0; j < 4; j++) {
+                if(this.props.chamPick && this.props.players[this.props.socket.id].cham) {
+                    row.push(
+                        <p className="topic-word pickable-word" key={i*4 + j} onClick={() => this.pickWord(i*4 + j)}>{this.props.topic.words[i*4 + j]}</p>
+                    )
+                } else {
+                    row.push(
+                        <p className="topic-word" style={{boxShadow: this.props.guess == i*4 + j ? "inset 0 0 0 2px rgb(3 117 154)" : "none"}} key={i*4 + j}>{this.props.topic.words[i*4 + j]}</p>
+                    )
+                }
+            }
+            rows.push(row);
+            row = []
+        }
+
+        return (
+            <div className="topic-table">
+                <h2 className="topic-header">{this.props.topic.name}</h2>
+                <div className="topic-row">
+                    {rows[0]}
+                </div>
+                <div className="topic-row">
+                    {rows[1]}
+                </div>
+                <div className="topic-row">
+                    {rows[2]}
+                </div>
+                <div className="topic-row">
+                    {rows[3]}
+                </div>
             </div>
-            <div className="topic-row">
-                <p className="topic-word">{props.topic.words[4]}</p>
-                <p className="topic-word">{props.topic.words[5]}</p>
-                <p className="topic-word">{props.topic.words[6]}</p>
-                <p className="topic-word">{props.topic.words[7]}</p>
-            </div>
-            <div className="topic-row">
-                <p className="topic-word">{props.topic.words[8]}</p>
-                <p className="topic-word">{props.topic.words[9]}</p>
-                <p className="topic-word">{props.topic.words[10]}</p>
-                <p className="topic-word">{props.topic.words[11]}</p>
-            </div>
-            <div className="topic-row">
-                <p className="topic-word">{props.topic.words[12]}</p>
-                <p className="topic-word">{props.topic.words[13]}</p>
-                <p className="topic-word">{props.topic.words[14]}</p>
-                <p className="topic-word">{props.topic.words[15]}</p>
-            </div>
-        </div>
-    )
+        )
+    }
 }
 
 function GameWord(props) {
@@ -250,6 +289,8 @@ function GameLayout(props) {
     const myTurn = props.myTurn;
     const votePhase = props.votePhase;
     const endPhase = props.endPhase;
+    const chamPick = (props.pWin || props.cWin);
+
     if(votePhase) {
         return (
             <div className="game-layout">
@@ -262,7 +303,14 @@ function GameLayout(props) {
                     votePhase={props.votePhase}
                     endPhase={props.endPhase}
                 />
-                <TopicTable topic={props.topic}/>
+                <TopicTable 
+                    topic={props.topic}
+                    players={props.players}
+                    chamPick={chamPick}
+                    socket={props.socket}
+                    isCorrect={props.isCorrect}
+                    guess={props.guess}
+                />
                 <div className="vote-wrapper">
                     <h2>Discuss!</h2>
                     <h3>Then vote for the chameleon...</h3>
@@ -283,15 +331,26 @@ function GameLayout(props) {
                     tie={props.tie}
                     tiedIds={props.tiedIds}
                 />
-                <TopicTable topic={props.topic}/>
+                <TopicTable
+                    topic={props.topic}
+                    players={props.players}
+                    chamPick={chamPick}
+                    socket={props.socket}
+                    isCorrect={props.isCorrect}
+                    guess={props.guess}
+                />
                 <EndWrapper
                     socket={props.socket}
+                    topic={props.topic}
                     order={props.order}
                     tie={props.tie}
                     pWin={props.pWin}
                     cWin={props.cWin}
                     votedName={props.votedName}
                     chamName={props.chamName}
+                    isCorrect={props.isCorrect}
+                    guess={props.guess}
+                    word={props.word}
                 />
             </div>
         )
@@ -307,7 +366,14 @@ function GameLayout(props) {
                     votePhase={props.votePhase}
                     endPhase={props.endPhase}
                 />
-                <TopicTable topic={props.topic}/>
+                <TopicTable 
+                    topic={props.topic}
+                    players={props.players}
+                    chamPick={chamPick}
+                    socket={props.socket}
+                    isCorrect={props.isCorrect}
+                    guess={props.guess}
+                />
                 <WordForm socket={props.socket}/>
             </div>
         )
@@ -323,7 +389,14 @@ function GameLayout(props) {
                     votePhase={props.votePhase}
                     endPhase={props.endPhase}
                 />
-                <TopicTable topic={props.topic}/>
+                <TopicTable 
+                    topic={props.topic}
+                    players={props.players}
+                    chamPick={chamPick}
+                    socket={props.socket}
+                    isCorrect={props.isCorrect}
+                    guess={props.guess}
+                />
             </div>
         )
     }
@@ -349,7 +422,9 @@ class Game extends React.Component {
             pWin: false,
             cWin: false,
             votedName: "",
-            chamName: ""
+            chamName: "",
+            isCorrect: -1,
+            guess: -1
         }
 
         this.props.socket.on('update-topic', (topic) => {
@@ -385,26 +460,54 @@ class Game extends React.Component {
 
         this.props.socket.on('vote-phase', (players) => {
             this.setState({turnId: "", myTurn: false, votePhase: true})
-        })
+        });
 
         this.props.socket.on('end-phase', (players) => {
             console.log("caught endphase")
             this.setState({votePhase: false, endPhase: true})
-        })
+        });
 
         this.props.socket.on('tie', (ids, order) => {
             this.setState({tie: true, tiedIds: ids});
-        })
+        });
 
         this.props.socket.on('p-win', (name) => {
             console.log("caught pwin")
             this.setState({tie: false, pWin: true, chamName: name})
-        })
+        });
 
         this.props.socket.on('c-win', (votedName, name) => {
             console.log("caught cwin")
             this.setState({tie: false, cWin: true, votedName: votedName, chamName: name})
-        })
+        });
+
+        this.props.socket.on('is-correct', (i, index) => {
+            console.log("caught correct");
+            this.setState({isCorrect: i, guess: index, pWin: false, cWin: false});
+        });
+
+        this.props.socket.on('reset-state', (name) => {
+            console.log(name + " restarted the game");
+            this.setState({
+                topic: null,
+                word: "",
+                players: null,
+                order: [],
+                turnId: "",
+                myTurn: false,
+                votePhase: false,
+                endPhase: false,
+                isLoaded: false,
+                tie: false,
+                tiedIds: [],
+                pWin: false,
+                cWin: false,
+                votedName: "",
+                chamName: "",
+                isCorrect: -1,
+                guess: -1
+            });
+        });
     }
 
     checkLoaded = () => {
@@ -432,6 +535,8 @@ class Game extends React.Component {
                     cWin={this.state.cWin}
                     votedName={this.state.votedName}
                     chamName={this.state.chamName}
+                    isCorrect={this.state.isCorrect}
+                    guess={this.state.guess}
                 />
             )
         }

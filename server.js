@@ -62,7 +62,12 @@ io.on('connection', (sock) => {
 
     sock.on('restart', () => {
         restart();
-        io.emit('update-players-ordered', getPlayers(), getOrder());
+        io.emit('reset-state', getPlayers()[sock.id].name);
+        io.emit('update-topic', getTopic());
+        io.emit('update-word', getWord());
+        io.emit('update-players', getPlayers());
+        io.emit('update-order', getOrder());
+        io.emit('new-turn', getOrder()[getTurn()]);
     });
 
     sock.on('word', (word) => {
@@ -103,6 +108,15 @@ io.on('connection', (sock) => {
             io.emit('c-win', getPlayers()[id].name, getPlayers()[getChameleon()].name);
         }
     });
+
+    sock.on('cham-word', (index) => {
+        console.log("caught chamword");
+        if(getTopic().words[index] == getWord()) {
+            io.emit('is-correct', 1, index);
+        } else {
+            io.emit('is-correct', 0, index);
+        }
+    })
 
     sock.on('disconnect', (sock) => {
         removePlayer(sock.id);
