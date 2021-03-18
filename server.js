@@ -28,7 +28,7 @@ const io = socketIO(server);
 
 
 const { addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, restart, endWordPhase,
-        isStarted, getOrder, getTurn, getTopic, getVotes } = createGame(topics);
+        isStarted, getOrder, getTurn, getTopic, getWord, getVotes } = createGame(topics);
 
 
 io.on('connection', (sock) => {
@@ -43,7 +43,7 @@ io.on('connection', (sock) => {
         } else if(addPlayer(sock.id, name)) {
             io.emit('message', getPlayers());
             sock.emit('joined', name);
-            io.emit('update-players', getPlayers());
+            io.emit('add-player', getPlayers());
         } else {
             sock.emit('error', 'Game is full!');
         }
@@ -54,8 +54,10 @@ io.on('connection', (sock) => {
         io.emit('started', getPlayers()[sock.id].name);
         io.emit('message', getPlayers());
         io.emit('update-topic', getTopic());
-        io.emit('update-players-ordered', getPlayers(), getOrder());
-        io.emit('newTurn', getOrder()[getTurn()]);
+        io.emit('update-word', getWord());
+        io.emit('update-players', getPlayers());
+        io.emit('update-order', getOrder());
+        io.emit('new-turn', getOrder()[getTurn()]);
     });
 
     sock.on('restart', () => {
@@ -65,36 +67,40 @@ io.on('connection', (sock) => {
 
     sock.on('word', (word) => {
         setWord(sock.id, word);
+        console.log("got word " + word)
+        io.emit('update-players', getPlayers());
         if(getTurn() == Object.keys(getPlayers()).length) {
-            io.emit('votePhase', getPlayers());
+            io.emit('vote-phase', getPlayers());
             endWordPhase();
         } else {
-            io.emit('newTurn', getOrder()[getTurn()]);
+            io.emit('new-turn', getOrder()[getTurn()]);
         }
     });
 
     sock.on('vote', (id) => {
-        castVote(id);
+        castVote(sock.id, id);
+        io.emit('update-players', getPlayers());
         if(getVotes() == Object.keys(getPlayers()).length) {
             let ids = tallyVotes();
-            io.emit('endPhase');
+            io.emit('end-phase');
             if(ids.length > 1) {
                 io.emit('tie', ids, getOrder());
             } else {
                 if(getChameleon() == ids[0]) {
-                    io.emit('pWin', getPlayers()[ids[0]].name);
+                    io.emit('p-win', getPlayers()[ids[0]].name);
                 } else {
-                    io.emit('cWin', getPlayers()[getChameleon()].name);
+                    io.emit('c-win', getPlayers()[ids[0]].name, getPlayers()[getChameleon()].name);
                 }
             }
         }
     });
 
-    server.on('tiebreak', (id) => {
-        if(getChameleon == id) {
-            io.emit('pWin', getPlayers()[ids[0]].name);
+    sock.on('tiebreak', (id) => {
+        console.log("caught tiebreak")
+        if(getChameleon() == id) {
+            io.emit('p-win', getPlayers()[id].name);
         } else {
-            io.emit('cWin', getPlayers()[getChameleon()].name);
+            io.emit('c-win', getPlayers()[id].name, getPlayers()[getChameleon()].name);
         }
     });
 

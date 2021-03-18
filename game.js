@@ -3,6 +3,7 @@ const createGame = (topics) => {
     let players = {};
     let chameleon = "";
     let topic;
+    let word = "";
     let started = false;
     let order = [];
     let turn = 0;
@@ -14,7 +15,8 @@ const createGame = (topics) => {
                 name: name,
                 cham: false,
                 word: "",
-                vote: 0
+                vote: 0,
+                voted: false
             }
             return true;
         } else {
@@ -38,10 +40,10 @@ const createGame = (topics) => {
         console.log(players[id].word);
     }
 
-    const castVote = (id) => {
-        players[id].vote++;
+    const castVote = (voterId, voteeId) => {
+        players[voterId].voted = true;
+        players[voteeId].vote++;
         votes++;
-        console.log(players[id].vote);
     }
 
     const tallyVotes = () => {
@@ -49,11 +51,12 @@ const createGame = (topics) => {
         let mostIDs = []
 
         for(var id in players) {
+            console.log(players[id].name + " - " + players[id].vote);
             if(players[id].vote > most) {
                 most = players[id].vote;
                 mostIDs = [];
                 mostIDs.push(id);
-            } else if(players[id] == most) {
+            } else if(players[id].vote == most) {
                 mostIDs.push(id);
             }
         }
@@ -105,6 +108,12 @@ const createGame = (topics) => {
         topic = ts[r];
     }
 
+    const getWord = () => {
+        r = Math.floor(Math.random() * 16);
+        word = topic.words[r];
+        return word;
+    }
+
     const startGame = () => {
         pickTopic();
         pickChameleon();
@@ -142,7 +151,7 @@ const createGame = (topics) => {
 
     return {
         addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, endWordPhase, 
-        isStarted, getOrder, getTurn, getTopic, getVotes
+        isStarted, getOrder, getTurn, getTopic, getWord, getVotes
     };
 };
 

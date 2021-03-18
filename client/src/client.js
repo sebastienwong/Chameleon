@@ -80,7 +80,7 @@ const startGame = (sock) => (e) => {
         $("#buttons").css("display", "none");
     });
 
-    sock.on('newTurn', (id) => {
+    sock.on('new-turn', (id) => {
         if(sock.id == id) {
             $("#word_form").css("display", "block");
         } else {
