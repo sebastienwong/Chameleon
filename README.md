@@ -17,6 +17,8 @@ I wanted to try to build everything from scratch, from-the-ground up. So followi
 - Big Things
   - Add rooms so multiple games can be played at once
   - Clean up my React! Get the components in their own files. This is proving difficult because I am trying to learn how to use browserify with babel to build the project and its hard :(
+  - Add rules section
+  - Add more than 1 topic haha
   
 - Smaller Things
   - Handle disconnections
