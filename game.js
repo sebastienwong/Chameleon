@@ -152,6 +152,10 @@ const createGame = (topics) => {
         return started;
     }
 
+    const end = () => {
+        started = false;
+    }
+
     const getOrder = () => {
         return order;
     }
@@ -170,7 +174,7 @@ const createGame = (topics) => {
 
     return {
         addPlayer, removePlayer, setName, setWord, castVote, tallyVotes, getPlayers, getChameleon, startGame, restart, endWordPhase, 
-        isStarted, getOrder, getTurn, getTopic, getWord, getVotes
+        isStarted, getOrder, getTurn, getTopic, getWord, getVotes, end
     };
 };
 

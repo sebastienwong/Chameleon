@@ -2,7 +2,8 @@ class EndWrapper extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            reveal: false
+            reveal: false,
+            ellipses: ""
         }
     }
 
@@ -11,8 +12,17 @@ class EndWrapper extends React.Component {
     }
 
     startCount = async () => {
-        //await new Promise(res => setTimeout(res, 5000));
-        this.setState({reveal: true});
+        await new Promise(res => setTimeout(res, 1500));
+        this.setState({ellipses: "."});
+
+        await new Promise(res => setTimeout(res, 1500));
+        this.setState({ellipses: ". ."});
+
+        await new Promise(res => setTimeout(res, 1500));
+        this.setState({ellipses: ". . ."});
+
+        await new Promise(res => setTimeout(res, 1500));
+        this.setState({reveal: true, ellipses: ""});
     }
 
     playAgain = () => {
@@ -24,8 +34,7 @@ class EndWrapper extends React.Component {
         if(!this.state.reveal) {
             return (
                 <div className="end-wrapper">
-                    <h2>The votes are in!</h2>
-                    <h3>You all voted for...</h3>
+                    <h2>The votes are in {this.state.ellipses}</h2>
                 </div>
             )
         } else {
@@ -49,7 +58,7 @@ class EndWrapper extends React.Component {
             } else if(this.props.pWin) {
                 return (
                     <div className="end-wrapper">
-                        <h2>{this.props.chamName}</h2>
+                        <h2>You voted for {this.props.chamName}</h2>
                         <h3 className="end-line">They we're the chameleon!</h3>
                         <h3>But can they guess the word?</h3>
                     </div>
@@ -57,7 +66,7 @@ class EndWrapper extends React.Component {
             } else if(this.props.cWin) {
                 return (
                     <div className="end-wrapper">
-                        <h2>{this.props.votedName}</h2>
+                        <h2>You voted for {this.props.votedName}</h2>
                         <h3 className="end-line">They we're NOT the chameleon!</h3>
                         <h3>{this.props.chamName} blended in!  Now can they guess the word?</h3>
                     </div>
@@ -65,17 +74,21 @@ class EndWrapper extends React.Component {
             } else if(this.props.isCorrect == 1) {
                 return (
                     <div className="end-wrapper">
-                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}!</h2>
-                        <h3 className="end-line">They got it!  Good job chameleon.</h3>
-                        <button onClick={this.playAgain}>Play again?</button>
+                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}</h2>
+                        <div className="end-line-wrapper">
+                            <h3 className="end-line">They got it!  Good job chameleon.</h3>
+                            <button onClick={this.playAgain}>Play again?</button>
+                        </div>
                     </div>
                 )
             } else if(this.props.isCorrect == 0) {
                 return (
                     <div className="end-wrapper">
-                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}!</h2>
-                        <h3 className="end-line">Nice try chameleon!  The word was {this.props.word}.</h3>
-                        <button onClick={this.playAgain}>Play again?</button>
+                        <h2>The chameleon guessed: {this.props.topic.words[this.props.guess]}</h2>
+                        <div className="end-line-wrapper">
+                            <h3 className="end-line">Nice try chameleon!  The word was {this.props.word}.</h3>
+                            <button onClick={this.playAgain}>Play again?</button>
+                        </div>
                     </div>
                 )
             } else {
@@ -583,7 +596,10 @@ class Setup extends React.Component {
             players: {},
             screen: 1,
             gameStart: false,
-            error: ""
+            host: false,
+            inputCode: "",
+            roomCode: "",
+            error: "",
         }
     }
   
@@ -592,7 +608,18 @@ class Setup extends React.Component {
     }
   
     nameSubmit = (e) => {
-        this.joinGame();
+        this.resetError();
+        this.setupSocket(this.state.host);
+        e.preventDefault();
+    }
+
+    codeChange = (e) => {
+        this.setState({inputCode: e.target.value});
+    }
+  
+    codeSubmit = (e) => {
+        this.resetError();
+        this.state.socket.emit('join-game', this.state.inputCode, this.state.name);
         e.preventDefault();
     }
 
@@ -602,11 +629,11 @@ class Setup extends React.Component {
         }
     }
 
-    joinGame = () => {
+    setupSocket = (isHost) => {
         const socket = io();
         this.setState({socket});
 
-        socket.emit("join", this.state.name);
+        //socket.emit("join", this.state.name);
 
         socket.on("message", (message) => {
             //console.log(message);
@@ -618,7 +645,15 @@ class Setup extends React.Component {
         })
 
         socket.on("add-player", (players) => {
+            this.resetError();
+            console.log(players);
             this.addPlayer(players);
+        })
+
+        socket.on("remove-player", (players) => {
+            this.resetError();
+            console.log("caught remove player");
+            this.removePlayer(players);
         })
 
         socket.on("started", (name) => {
@@ -630,14 +665,52 @@ class Setup extends React.Component {
             console.error(e);
             this.setState({error: e});
         })
+
+        socket.on('created-game', (roomCode) => {
+            console.log("caught created game")
+            this.setState({roomCode, screen: 4});
+        })
+
+        socket.on('joined-game', (roomCode) => {
+            this.setState({roomCode});
+            this.nextScreen();
+        })
+
+        socket.on('back-to-lobby', () => {
+            this.setState({gameStart: false});
+        })
+
+        if(isHost) {
+            socket.emit('create-game', this.state.name);
+        } else {
+            this.nextScreen();
+        }
     }
 
     addPlayer = (players) => {
         this.setState({players});
     }
 
+    removePlayer = (players) => {
+        this.setState({players});
+    }
+
+    createGame = () => {
+        this.setState({host: true});
+        this.nextScreen();
+    }
+
+    joinGame = () => {
+        this.setState({host: false});
+        this.nextScreen();
+    }
+
     startGame = () => {
         this.state.socket.emit("start");
+    }
+
+    resetError = () => {
+        this.setState({error: ""});
     }
 
     render() {
@@ -649,7 +722,10 @@ class Setup extends React.Component {
             return (
                 <div className="start-wrapper">
                     <h1 className="title">Chameleon</h1>
-                    <button onClick={this.nextScreen}>Join Game</button>
+                    <div className="start-button-wrapper">
+                        <button onClick={() => this.createGame()}>Create Game</button>
+                        <button onClick={() => this.joinGame()}>Join Game</button>
+                    </div>
                 </div>
             );
         } else if(this.state.screen == 2) {
@@ -665,10 +741,23 @@ class Setup extends React.Component {
             );
         } else if(this.state.screen == 3) {
             return (
+                <div className="name-wrapper">
+                    <h2>Enter a room code:</h2>
+                    <form className="name-form" onSubmit={this.codeSubmit}>
+                        <input className="name-input" type="text" value={this.state.inputCode} onChange={this.codeChange} autoFocus={true} onBlur={({ target }) => target.focus()} maxLength={4} spellCheck="false"></input>
+                        <input className="name-submit" type="submit" disabled={!this.state.inputCode} value="" />
+                    </form>
+                    <p className="error">{this.state.error}</p>
+                </div>
+            );
+        } else if(this.state.screen == 4) {
+            return (
                 <div className="lobby-wrapper">
                     <h2>Lobby</h2>
+                    <h3 className="lobby-code"> The room code is: {this.state.roomCode}</h3>
                     <PlayerList players={this.state.players}/>
-                    <button onClick={this.startGame}>Everybody's In</button>
+                    {Object.keys(this.state.players).length >= 3 && <button onClick={this.startGame}>Everybody's In</button>}
+                    <p className="error">{this.state.error}</p>
                 </div>
             );
         }
